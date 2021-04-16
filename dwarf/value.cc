@@ -202,7 +202,7 @@ value::as_reference() const
                 uint64_t sig = cur.fixed<uint64_t>();
                 try {
                         return cu->get_dwarf().get_type_unit(sig).type();
-                } catch (std::out_of_range &e) {
+                } catch (std::out_of_range &) {
                         throw format_error("unknown type signature 0x" + to_hex(sig));
                 }
         }
@@ -275,11 +275,11 @@ value::resolve_indirect(DW_AT name)
                 return;
 
         cursor c(cu->data(), offset);
-        DW_FORM form;
+        DW_FORM form_;
         do {
-                form = (DW_FORM)c.uleb128();
-        } while (form == DW_FORM::indirect);
-        typ = attribute_spec(name, form).type;
+                form_ = (DW_FORM)c.uleb128();
+        } while (form_ == DW_FORM::indirect);
+        typ = attribute_spec(name, form_).type;
         offset = c.get_section_offset();
 }
 

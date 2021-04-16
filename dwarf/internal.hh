@@ -65,18 +65,18 @@ struct section
         section(const section &o) = default;
 
         std::shared_ptr<section> slice(section_offset start, section_length len,
-                                       format fmt = format::unknown,
-                                       unsigned addr_size = 0)
+                                       format fmt_ = format::unknown,
+                                       unsigned addr_size_ = 0)
         {
-                if (fmt == format::unknown)
-                        fmt = this->fmt;
-                if (addr_size == 0)
-                        addr_size = this->addr_size;
+                if (fmt_ == format::unknown)
+                        fmt_ = this->fmt;
+                if (addr_size_ == 0)
+                        addr_size_ = this->addr_size;
 
                 return std::make_shared<section>(
                         type, begin+start,
                         std::min(len, (section_length)(end-begin)),
-                        ord, fmt, addr_size);
+                        ord, fmt_, addr_size_);
         }
 
         size_t size() const

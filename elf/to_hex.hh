@@ -20,7 +20,7 @@ to_hex(T v)
         char *pos = &buf[sizeof(buf)-1];
         *pos-- = '\0';
         while (v && pos >= buf) {
-                int digit = v & 0xf;
+                int8_t digit = v & 0xf;
                 if (digit < 10)
                         *pos = '0' + digit;
                 else

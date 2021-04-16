@@ -253,8 +253,8 @@ unit::impl::force_abbrevs()
         if (highest * 10 < abbrevs_map.size() * 15) {
                 // Move the map into the vector
                 abbrevs_vec.resize(highest + 1);
-                for (auto &entry : abbrevs_map)
-                        abbrevs_vec[entry.first] = move(entry.second);
+                for (auto &entry_ : abbrevs_map)
+                        abbrevs_vec[entry_.first] = move(entry_.second);
                 abbrevs_map.clear();
         }
 
@@ -295,7 +295,7 @@ compilation_unit::get_line_table() const
                 shared_ptr<section> sec;
                 try {
                         sec = m->file.get_section(section_type::line);
-                } catch (format_error &e) {
+                } catch (format_error &) {
                         goto done;
                 }
 

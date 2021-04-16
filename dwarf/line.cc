@@ -236,13 +236,13 @@ line_table::file::file(string path, uint64_t mtime, uint64_t length)
 }
 
 void
-line_table::entry::reset(bool is_stmt)
+line_table::entry::reset(bool is_stmt_)
 {
         address = op_index = 0;
         file = nullptr;
         file_index = line = 1;
         column = 0;
-        this->is_stmt = is_stmt;
+        this->is_stmt = is_stmt_;
         basic_block = end_sequence = prologue_end = epilogue_begin = false;
         isa = discriminator = 0;
 }
@@ -303,22 +303,22 @@ line_table::iterator::operator++()
 bool
 line_table::iterator::step(cursor *cur)
 {
-        struct line_table::impl *m = table->m.get();
+        struct line_table::impl *m_ = table->m.get();
 
         // Read the opcode (DWARF4 section 6.2.3)
         ubyte opcode = cur->fixed<ubyte>();
-        if (opcode >= m->opcode_base) {
+        if (opcode >= m_->opcode_base) {
                 // Special opcode (DWARF4 section 6.2.5.1)
-                ubyte adjusted_opcode = opcode - m->opcode_base;
-                unsigned op_advance = adjusted_opcode / m->line_range;
-                signed line_inc = m->line_base + (signed)adjusted_opcode % m->line_range;
+                ubyte adjusted_opcode = opcode - m_->opcode_base;
+                unsigned op_advance = adjusted_opcode / m_->line_range;
+                signed line_inc = m_->line_base + (signed)adjusted_opcode % m_->line_range;
 
                 regs.line += line_inc;
-                regs.address += m->minimum_instruction_length *
+                regs.address += m_->minimum_instruction_length *
                         ((regs.op_index + op_advance)
-                         / m->maximum_operations_per_instruction);
+                         / m_->maximum_operations_per_instruction);
                 regs.op_index = (regs.op_index + op_advance)
-                        % m->maximum_operations_per_instruction;
+                        % m_->maximum_operations_per_instruction;
                 entry = regs;
 
                 regs.basic_block = regs.prologue_end =
@@ -337,8 +337,10 @@ line_table::iterator::step(cursor *cur)
                 // opcodes even if they're from a later version of the
                 // standard than the line table header claims.
                 uint64_t uarg;
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic warning "-Wswitch-enum"
+#endif
                 switch ((DW_LNS)opcode) {
                 case DW_LNS::copy:
                         entry = regs;
@@ -350,20 +352,20 @@ line_table::iterator::step(cursor *cur)
                         // Opcode advance (as for special opcodes)
                         uarg = cur->uleb128();
                 advance_pc:
-                        regs.address += m->minimum_instruction_length *
+                        regs.address += m_->minimum_instruction_length *
                                 ((regs.op_index + uarg)
-                                 / m->maximum_operations_per_instruction);
+                                 / m_->maximum_operations_per_instruction);
                         regs.op_index = (regs.op_index + uarg)
-                                % m->maximum_operations_per_instruction;
+                                % m_->maximum_operations_per_instruction;
                         break;
                 case DW_LNS::advance_line:
-                        regs.line = (signed)regs.line + cur->sleb128();
+                        regs.line = (unsigned)((signed)regs.line + cur->sleb128());
                         break;
                 case DW_LNS::set_file:
-                        regs.file_index = cur->uleb128();
+                        regs.file_index = (unsigned)cur->uleb128();
                         break;
                 case DW_LNS::set_column:
-                        regs.column = cur->uleb128();
+                        regs.column = (unsigned)cur->uleb128();
                         break;
                 case DW_LNS::negate_stmt:
                         regs.is_stmt = !regs.is_stmt;
@@ -372,7 +374,7 @@ line_table::iterator::step(cursor *cur)
                         regs.basic_block = true;
                         break;
                 case DW_LNS::const_add_pc:
-                        uarg = (255 - m->opcode_base) / m->line_range;
+                        uarg = (255 - m_->opcode_base) / m_->line_range;
                         goto advance_pc;
                 case DW_LNS::fixed_advance_pc:
                         regs.address += cur->fixed<uhalf>();
@@ -385,7 +387,7 @@ line_table::iterator::step(cursor *cur)
                         regs.epilogue_begin = true;
                         break;
                 case DW_LNS::set_isa:
-                        regs.isa = cur->uleb128();
+                        regs.isa = (unsigned)cur->uleb128();
                         break;
                 default:
                         // XXX Vendor extensions
@@ -409,18 +411,18 @@ line_table::iterator::step(cursor *cur)
                 case DW_LNE::end_sequence:
                         regs.end_sequence = true;
                         entry = regs;
-                        regs.reset(m->default_is_stmt);
+                        regs.reset(m_->default_is_stmt);
                         break;
                 case DW_LNE::set_address:
                         regs.address = cur->address();
                         regs.op_index = 0;
                         break;
                 case DW_LNE::define_file:
-                        m->read_file_entry(cur, false);
+                        m_->read_file_entry(cur, false);
                         break;
                 case DW_LNE::set_discriminator:
                         // XXX Only DWARF4
-                        regs.discriminator = cur->uleb128();
+                        regs.discriminator = (unsigned)cur->uleb128();
                         break;
                 default:
                         // XXX Prior to DWARF4, any opcode number
@@ -428,7 +430,9 @@ line_table::iterator::step(cursor *cur)
                         throw format_error("unknown line number opcode " +
                                            to_string((DW_LNE)opcode));
                 }
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
 #pragma GCC diagnostic pop
+#endif
                 if (cur->get_section_offset() > end)
                         throw format_error("extended line number opcode exceeded its size");
                 cur += end - cur->get_section_offset();
