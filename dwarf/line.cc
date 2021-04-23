@@ -5,6 +5,7 @@
 #include "internal.hh"
 
 #include <cassert>
+#include <filesystem>
 
 using namespace std;
 
@@ -124,11 +125,12 @@ line_table::line_table(const shared_ptr<section> &sec, section_offset offset,
         m->include_directories.push_back(comp_dir);
         while (true) {
                 cur.string(incdir);
+                std::filesystem::path p = incdir;
                 if (incdir.empty())
                         break;
                 if (incdir.back() != '/')
                         incdir += '/';
-                if (incdir[0] == '/')
+                if (p.is_absolute())//incdir[0] == '/')
                         m->include_directories.push_back(move(incdir));
                 else
                         m->include_directories.push_back(comp_dir + incdir);
@@ -138,7 +140,8 @@ line_table::line_table(const shared_ptr<section> &sec, section_offset offset,
         string file_name;
         // File name 0 is implicitly the compilation unit file name.
         // cu_name can be relative to comp_dir or absolute.
-        if (!cu_name.empty() && cu_name[0] == '/')
+        std::filesystem::path p = cu_name;
+        if (!cu_name.empty() && p.is_absolute())////cu_name[0] == '/')
                 m->file_names.emplace_back(cu_name);
         else
                 m->file_names.emplace_back(comp_dir + cu_name);
