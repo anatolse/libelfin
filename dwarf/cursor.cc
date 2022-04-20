@@ -28,7 +28,6 @@ cursor::sleb128()
                 }
         }
         underflow();
-        return 0;
 }
 
 shared_ptr<section>

@@ -158,7 +158,6 @@ struct cursor
                         shift += 7;
                 }
                 underflow();
-                return 0;
         }
 
         taddr address()
@@ -215,7 +214,7 @@ private:
         cursor(const std::shared_ptr<section> sec, const char *pos)
                 : sec(sec), pos(pos) { }
 
-        void underflow();
+        [[noreturn]]void underflow();
 };
 
 /**
