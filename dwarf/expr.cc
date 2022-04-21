@@ -167,7 +167,9 @@ expr::evaluate(expr_context *ctx, const std::initializer_list<taddr> &arguments)
                         // 2.5.1.2 Register based addressing
                 case DW_OP::fbreg:
                         // XXX
-                        throw runtime_error("DW_OP_fbreg not implemented");
+                        //throw runtime_error("DW_OP_fbreg not implemented");
+                        stack.push_back((int64_t)ctx->fbreg() + cur.sleb128());
+                        break;
                 case DW_OP::breg0:
                 case DW_OP::breg1:
                 case DW_OP::breg2:

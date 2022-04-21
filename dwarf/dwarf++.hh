@@ -794,6 +794,15 @@ public:
          * Return the value stored in register regnum.  This is used
          * to implement DW_OP_breg* operations.
          */
+        virtual taddr fbreg()
+        {
+            throw expr_error("DW_OP_fbreg operations not supported");
+        }
+
+        /**
+         * Return the value stored in register regnum.  This is used
+         * to implement DW_OP_breg* operations.
+         */
         virtual taddr reg(unsigned regnum)
         {
                 throw expr_error("DW_OP_breg* operations not supported");
