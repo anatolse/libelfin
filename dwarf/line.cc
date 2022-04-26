@@ -427,6 +427,9 @@ line_table::iterator::step(cursor *cur)
                         // XXX Only DWARF4
                         regs.discriminator = (unsigned)cur->uleb128();
                         break;
+                case DW_LNE::lo_user:
+                case DW_LNE::hi_user:
+                        break;
                 default:
                         // XXX Prior to DWARF4, any opcode number
                         // could be a vendor extension

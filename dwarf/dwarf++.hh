@@ -1288,6 +1288,12 @@ public:
 class line_table::iterator
 {
 public:
+        using value_type        = line_table::entry;
+        using reference         = line_table::entry&;
+        using pointer           = line_table::entry*;
+        using difference_type   = std::ptrdiff_t;
+        using iterator_category = std::forward_iterator_tag;
+
         /**
          * \internal Construct an iterator for the given line table
          * starting pos bytes into the table's section.

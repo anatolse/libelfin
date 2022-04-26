@@ -495,7 +495,9 @@ expr::evaluate(expr_context *ctx, const std::initializer_list<taddr> &arguments)
                 case DW_OP::bit_piece:
                         // XXX
                         throw runtime_error(to_string(op) + " not implemented");
-
+                case DW_OP::lo_user:
+                case DW_OP::hi_user:
+                        break;
                 default:
                         throw expr_error("bad operation " + to_string(op));
                 }
