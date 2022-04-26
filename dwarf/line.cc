@@ -5,9 +5,10 @@
 #include "internal.hh"
 
 #include <cassert>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 using namespace std;
+namespace fs = boost::filesystem;
 
 DWARFPP_BEGIN_NAMESPACE
 
@@ -125,7 +126,7 @@ line_table::line_table(const shared_ptr<section> &sec, section_offset offset,
         m->include_directories.push_back(comp_dir);
         while (true) {
                 cur.string(incdir);
-                std::filesystem::path p = incdir;
+                fs::path p = incdir;
                 if (incdir.empty())
                         break;
                 if (incdir.back() != '/')
@@ -140,7 +141,7 @@ line_table::line_table(const shared_ptr<section> &sec, section_offset offset,
         string file_name;
         // File name 0 is implicitly the compilation unit file name.
         // cu_name can be relative to comp_dir or absolute.
-        std::filesystem::path p = cu_name;
+        fs::path p = cu_name;
         if (!cu_name.empty() && p.is_absolute())////cu_name[0] == '/')
                 m->file_names.emplace_back(cu_name);
         else

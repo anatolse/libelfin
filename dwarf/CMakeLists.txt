@@ -25,3 +25,4 @@ set(HEADERS
 
 add_library(dwarf STATIC ${SRC} ${HEADERS})
 target_include_directories(dwarf INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(dwarf PUBLIC Boost::filesystem )
